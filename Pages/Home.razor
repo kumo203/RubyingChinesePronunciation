@@ -1,0 +1,172 @@
+﻿@page "/"
+@using _pinyin_ruby.Services
+@inject IPinyinService PinyinService
+
+<PageTitle>Pinyin Ruby Tool</PageTitle>
+
+<div class="container main-container">
+    <div class="header-section text-center my-4">
+        <h1 class="display-4">Pinyin Ruby Tool</h1>
+        <p class="lead">Adding Pinyin ruby to Chinese text instantly.</p>
+    </div>
+    
+    <div class="input-section">
+        <div class="form-group">
+            <label for="TextInput" class="form-label fw-bold">Input Chinese Text:</label>
+            <textarea id="TextInput" @bind="inputText" class="form-control" rows="6" placeholder="Enter Chinese characters here (e.g., 你好世界)..."></textarea>
+        </div>
+        <div class="actions mt-3 text-end">
+            <button class="btn btn-primary btn-lg" @onclick="ConvertText">
+                <span class="oi oi-transfer me-2"></span>Convert
+            </button>
+        </div>
+    </div>
+
+    @if (rubyTokens != null)
+    {
+        <div class="output-section mt-5 fade-in">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title h5 mb-0">Result</h3>
+                </div>
+                <div class="card-body">
+                    <div class="preview-box p-3 border rounded bg-light" tabindex="0" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="true" @ref="previewBox">
+                        @for (int i = 0; i < rubyTokens.Count; i++)
+                        {
+                            var index = i; // Local variable for closure
+                            var token = rubyTokens[i];
+                            if (token.IsRuby)
+                            {
+                                <ruby class="@(GetClass(index))" @onclick="() => SelectToken(index)">
+                                    @token.Text<rt>@token.Pinyin</rt>
+                                </ruby>
+                            }
+                            else
+                            {
+                                <span class="plain-text">@token.Text</span>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string inputText = "你好，世界！";
+    private List<RubyToken>? rubyTokens;
+    private int selectedIndex = -1;
+    private ElementReference previewBox;
+
+    private void ConvertText()
+    {
+        if (!string.IsNullOrWhiteSpace(inputText))
+        {
+            rubyTokens = PinyinService.GetPinyin(inputText);
+            selectedIndex = -1;
+        }
+    }
+
+    private void SelectToken(int index)
+    {
+        selectedIndex = index;
+    }
+
+    private string GetClass(int index)
+    {
+        return index == selectedIndex ? "ruby-text selected" : "ruby-text";
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (rubyTokens == null || rubyTokens.Count == 0) return;
+
+        if (e.Key == "ArrowRight" || e.Key == "." || e.Key == ">")
+        {
+            MoveSelection(1);
+        }
+        else if (e.Key == "ArrowLeft" || e.Key == "," || e.Key == "<")
+        {
+            MoveSelection(-1);
+        }
+        else if (e.Key == "ArrowDown")
+        {
+            MoveToPhrase(1);
+        }
+        else if (e.Key == "ArrowUp")
+        {
+            MoveToPhrase(-1);
+        }
+    }
+
+    private void MoveSelection(int direction)
+    {
+        if (rubyTokens == null) return;
+        
+        int newIndex = selectedIndex;
+        
+        while (true)
+        {
+            newIndex += direction;
+            if (newIndex < 0 || newIndex >= rubyTokens.Count) break;
+
+            if (rubyTokens[newIndex].IsRuby)
+            {
+                selectedIndex = newIndex;
+                break;
+            }
+        }
+    }
+
+    private void MoveToPhrase(int direction)
+    {
+        if (rubyTokens == null) return;
+
+        int newIndex = selectedIndex;
+
+        while (true)
+        {
+            newIndex += direction;
+            if (newIndex < 0 || newIndex >= rubyTokens.Count) break;
+
+            if (IsPhraseStart(newIndex))
+            {
+                selectedIndex = newIndex;
+                break;
+            }
+        }
+    }
+
+    private bool IsPhraseStart(int index)
+    {
+        if (rubyTokens == null || index < 0 || index >= rubyTokens.Count) return false;
+        
+        // Must be a Ruby token (Chinese character)
+        if (!rubyTokens[index].IsRuby) return false;
+
+        // If it's the very first token, it's a start
+        if (index == 0) return true;
+
+        var prevToken = rubyTokens[index - 1];
+        if (prevToken.IsRuby) return false; // If prev is Chinese, continuous text
+
+        // Check if prevToken text contains any phrase delimiter
+        // We act if it contains punctuation. We do NOT act if it is just whitespace.
+        string text = prevToken.Text ?? "";
+        
+        // Define Phrase Delimiters:
+        // Sentence Enders: 。！？!?.\n\r
+        // Phrase Separators: ，, 、 ； ; ： :
+        if (text.Contains("。") || text.Contains("！") || text.Contains("？") || 
+            text.Contains("!") || text.Contains("?") || text.Contains(".") || 
+            text.Contains("\n") || text.Contains("\r") ||
+            text.Contains("，") || text.Contains(",") || text.Contains("、") ||
+            text.Contains("；") || text.Contains(";") || text.Contains("：") || text.Contains(":"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+}
