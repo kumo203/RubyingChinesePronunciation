@@ -7,7 +7,7 @@
 <div class="container main-container">
     <div class="header-section text-center my-4">
         <h1 class="display-4">Pinyin Ruby Tool</h1>
-        <p class="lead">Adding Pinyin ruby to Chinese text instantly.</p>
+        <p class="lead">Adding Pinyin/Zhuyin ruby to Chinese text instantly.</p>
     </div>
     
     <div class="input-section">
@@ -26,8 +26,15 @@
     {
         <div class="output-section mt-5 fade-in">
             <div class="card mb-4">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <h3 class="card-title h5 mb-0">Result</h3>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="rubyMode" id="modePinyin" value="pinyin" @onchange="ChangeMode" checked />
+                        <label class="btn btn-outline-light" for="modePinyin">Pinyin</label>
+                        
+                        <input type="radio" class="btn-check" name="rubyMode" id="modeZhuyin" value="zhuyin" @onchange="ChangeMode" />
+                        <label class="btn btn-outline-light" for="modeZhuyin">Zhuyin (注音)</label>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="preview-box p-3 border rounded bg-light" tabindex="0" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="true" @ref="previewBox">
@@ -37,8 +44,9 @@
                             var token = rubyTokens[i];
                             if (token.IsRuby)
                             {
+                                var rubyText = rubyMode == "zhuyin" ? token.Zhuyin : token.Pinyin;
                                 <ruby class="@(GetClass(index))" @onclick="() => SelectToken(index)">
-                                    @token.Text<rt>@token.Pinyin</rt>
+                                    @token.Text<rt>@rubyText</rt>
                                 </ruby>
                             }
                             else
@@ -58,6 +66,7 @@
     private List<RubyToken>? rubyTokens;
     private int selectedIndex = -1;
     private ElementReference previewBox;
+    private string rubyMode = "pinyin";
 
     private void ConvertText()
     {
@@ -66,6 +75,11 @@
             rubyTokens = PinyinService.GetPinyin(inputText);
             selectedIndex = -1;
         }
+    }
+
+    private void ChangeMode(ChangeEventArgs e)
+    {
+        rubyMode = e.Value?.ToString() ?? "pinyin";
     }
 
     private void SelectToken(int index)
@@ -170,3 +184,4 @@
         return false;
     }
 }
+

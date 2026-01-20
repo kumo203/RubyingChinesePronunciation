@@ -1,6 +1,6 @@
 # Pinyin Ruby Tool
 
-A client-side Blazor WebAssembly application that converts Chinese text into Pinyin with HTML `<ruby>` annotations.
+A client-side Blazor WebAssembly application that converts Chinese text into Pinyin/Zhuyin with HTML `<ruby>` annotations.
 
 ## 🚀 Current Status: Completed
 
@@ -8,7 +8,9 @@ The application is fully functional with the following features:
 
 ### ✨ Features
 *   **Chinese to Pinyin Conversion**: Uses `PinyinM.Net` for high-performance conversion (Offline/Client-side).
-*   **Ruby Annotation Display**: Renders Pinyin above characters using standard `<ruby>` tags.
+*   **Chinese to Zhuyin Conversion**: Custom Pinyin-to-Zhuyin mapping for Taiwanese Bopomofo system.
+*   **Ruby Annotation Display**: Renders Pinyin or Zhuyin above characters using standard `<ruby>` tags.
+*   **Mode Selector**: Toggle between Pinyin and Zhuyin (注音) display modes.
 *   **Interactive Selection**:
     *   **Click**: Select individual characters (turns Red).
     *   **Keyboard Navigation**:
@@ -45,12 +47,12 @@ Then open `http://localhost:8000`.
 *   Right-click `dist/wwwroot/index.html` -> "Open with Live Server".
 
 ## 📂 Project Structure
-*   `Pages/Home.razor`: Main UI and logic.
-*   `Services/PinyinService.cs`: Wraps the Pinyin conversion logic.
+*   `Pages/Home.razor`: Main UI with Pinyin/Zhuyin mode toggle.
+*   `Services/PinyinService.cs`: Handles Pinyin conversion and Pinyin-to-Zhuyin mapping.
+*   `Services/RubyToken.cs`: Data model supporting both Pinyin and Zhuyin.
 *   `dist/wwwroot`: The final build output (Ready for GitHub Pages, Netlify, etc.).
 
 ## ✅ Recent Updates
-*   Removed unused `Counter` and `Weather` pages.
-*   Removed raw HTML output pane.
-*   Implemented block-skipping navigation for Up/Down keys.
-*   Fixed selection issues with punctuation.
+*   Added Zhuyin (注音) ruby mode with Pinyin-to-Zhuyin conversion mapping.
+*   Added mode selector button in the result header to switch between Pinyin and Zhuyin.
+*   Updated RubyToken model to store both Pinyin and Zhuyin values.
