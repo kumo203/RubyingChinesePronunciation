@@ -7,18 +7,11 @@
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
   </PropertyGroup>
 
-  <Target Name="RemoveIntegrityAttributes" AfterTargets="Build;Publish">
-    <ItemGroup>
-      <IndexHtmlFiles Include="$(PublishDir)wwwroot/index.html" />
-    </ItemGroup>
-    <ReadLinesFromFile File="@(IndexHtmlFiles)">
-      <Output TaskParameter="Lines" ItemName="IndexHtmlContent" />
-    </ReadLinesFromFile>
+  <Target Name="RemoveIntegrityFromIndexHtml" AfterTargets="Publish">
     <PropertyGroup>
-      <IndexHtmlText>@(IndexHtmlContent, '%0A')</IndexHtmlText>
-      <IndexHtmlText>$([System.Text.RegularExpressions.Regex]::Replace($(IndexHtmlText), ' integrity="[^"]*"', ''))</IndexHtmlText>
+      <IndexHtmlPath>$(PublishDir)wwwroot\index.html</IndexHtmlPath>
     </PropertyGroup>
-    <WriteLinesToFile File="@(IndexHtmlFiles)" Lines="$(IndexHtmlText)" Overwrite="true" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File RemoveIntegrity.ps1 -IndexHtmlPath &quot;$(IndexHtmlPath)&quot;" />
   </Target>
 
   <ItemGroup>
