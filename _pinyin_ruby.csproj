@@ -5,8 +5,21 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
-    <BlazorEnableIntegrityCheck>false</BlazorEnableIntegrityCheck>
   </PropertyGroup>
+
+  <Target Name="RemoveIntegrityAttributes" AfterTargets="Build;Publish">
+    <ItemGroup>
+      <IndexHtmlFiles Include="$(PublishDir)wwwroot/index.html" />
+    </ItemGroup>
+    <ReadLinesFromFile File="@(IndexHtmlFiles)">
+      <Output TaskParameter="Lines" ItemName="IndexHtmlContent" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <IndexHtmlText>@(IndexHtmlContent, '%0A')</IndexHtmlText>
+      <IndexHtmlText>$([System.Text.RegularExpressions.Regex]::Replace($(IndexHtmlText), ' integrity="[^"]*"', ''))</IndexHtmlText>
+    </PropertyGroup>
+    <WriteLinesToFile File="@(IndexHtmlFiles)" Lines="$(IndexHtmlText)" Overwrite="true" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
