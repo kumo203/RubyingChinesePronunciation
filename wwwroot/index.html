@@ -4,14 +4,30 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>_pinyin_ruby</title>
-    <base href="/" />
-    <link rel="preload" id="webassembly" />
+    <meta name="description" content="Add Pinyin/Zhuyin ruby annotations to Chinese text instantly" />
+    <meta name="theme-color" content="#17a2b8" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Pinyin Ruby" />
+    
+    <title>Pinyin Ruby Tool</title>
+    <base href="/RubyingChinesePronunciationPage/" />
+    <link href="_framework/dotnet.fygprfh18i.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous"  />
+    <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="apple-touch-icon" href="favicon.png" />
     <link href="_pinyin_ruby.styles.css" rel="stylesheet" />
-    <script type="importmap"></script>
+    <script type="importmap">{
+  "imports": {
+    "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.66stpp682q.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.fygprfh18i.js",
+    "./_framework/dotnet.native.js": "./_framework/dotnet.native.xanz2e7ksm.js",
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.o0qy896u8v.js"
+  },
+  "scopes": {} }</script>
 </head>
 
 <body>
@@ -28,7 +44,18 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    
+    <script src="_framework/blazor.webassembly.66stpp682q.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/RubyingChinesePronunciationPage/service-worker.js')
+                    .then(registration => console.log('Service Worker registered:', registration))
+                    .catch(error => console.warn('Service Worker registration failed:', error));
+            });
+        }
+    </script>
 </body>
-
 </html>
