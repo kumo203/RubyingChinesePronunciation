@@ -2,12 +2,21 @@
     max-width: 900px;
 }
 
-.preview-box {
-    font-size: 1.5rem;
-    line-height: 2.5;
+.preview-boxes-container {
     outline: none;
     /* Remove default browser focus ring */
     cursor: default;
+}
+
+.preview-box {
+    font-size: 1.5rem;
+    line-height: 2.5;
+    /* Remove default browser focus ring */
+    cursor: default;
+}
+
+.ruby-line {
+    min-height: 1em;
 }
 
 ruby {

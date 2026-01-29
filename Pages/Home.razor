@@ -40,22 +40,32 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="preview-box p-3 border rounded bg-light" tabindex="0" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="true" @ref="previewBox">
-                        @for (int i = 0; i < rubyTokens.Count; i++)
+                    <div class="preview-boxes-container d-flex flex-column gap-2" tabindex="0" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="true" @ref="previewBox">
+                        @{
+                            var lines = GetTokenLines();
+                        }
+                        @foreach (var line in lines)
                         {
-                            var index = i;
-                            var token = rubyTokens[i];
-                            if (token.IsRuby)
-                            {
-                                var rubyText = rubyMode == "zhuyin" ? token.Zhuyin : token.Pinyin;
-                                <ruby class="@(GetClass(index))" @onclick="() => SelectToken(index)">
-                                    @token.Text<rt>@rubyText</rt>
-                                </ruby>
-                            }
-                            else
-                            {
-                                <span class="plain-text">@token.Text</span>
-                            }
+                            <div class="preview-box p-3 border rounded bg-light">
+                                <div class="ruby-line">
+                                    @foreach (var item in line)
+                                    {
+                                        var index = item.Index;
+                                        var token = item.Token;
+                                        if (token.IsRuby)
+                                        {
+                                            var rubyText = rubyMode == "zhuyin" ? token.Zhuyin : token.Pinyin;
+                                            <ruby class="@(GetClass(index))" @onclick="() => SelectToken(index)">
+                                                @token.Text<rt>@rubyText</rt>
+                                            </ruby>
+                                        }
+                                        else
+                                        {
+                                            <span class="plain-text">@token.Text</span>
+                                        }
+                                    }
+                                </div>
+                            </div>
                         }
                     </div>
                 </div>
@@ -115,6 +125,48 @@
     private int selectedIndex = -1;
     private ElementReference previewBox;
     private string rubyMode = "pinyin";
+
+    private record LineToken(int Index, RubyToken Token);
+
+    private List<List<LineToken>> GetTokenLines()
+    {
+        var lines = new List<List<LineToken>>();
+        if (rubyTokens == null) return lines;
+
+        var currentLine = new List<LineToken>();
+
+        for (int i = 0; i < rubyTokens.Count; i++)
+        {
+            var token = rubyTokens[i];
+            if (!token.IsRuby && token.Text != null && (token.Text.Contains('\n') || token.Text.Contains('\r')))
+            {
+                var parts = token.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                for (int j = 0; j < parts.Length; j++)
+                {
+                    if (parts[j].Length > 0)
+                    {
+                        currentLine.Add(new LineToken(i, new RubyToken { Text = parts[j], IsRuby = false }));
+                    }
+                    if (j < parts.Length - 1)
+                    {
+                        lines.Add(currentLine);
+                        currentLine = new List<LineToken>();
+                    }
+                }
+            }
+            else
+            {
+                currentLine.Add(new LineToken(i, token));
+            }
+        }
+
+        if (currentLine.Count > 0 || lines.Count == 0)
+        {
+            lines.Add(currentLine);
+        }
+
+        return lines;
+    }
 
     protected override async Task OnInitializedAsync()
     {
